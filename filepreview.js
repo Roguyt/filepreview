@@ -113,8 +113,8 @@ module.exports = {
         if (fileType === 'image') {
             const convertArgs = [`${input}[0]`, output];
 
-            if (options.pdf) {
-                convertArgs.splice(0, 0, `-density`, 200, '-colorspace', 'rgb');
+            if (extInput === 'pdf') {
+                convertArgs.splice(0, 0, `-density`, 300, '-colorspace', 'rgb');
             }
             if (options.width > 0 && options.height > 0) {
                 convertArgs.splice(0, 0, '-resize', `${options.width}x${options.height}`);
