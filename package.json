@@ -1,32 +1,45 @@
 {
-  "name": "filepreview",
-  "version": "1.0.16",
-  "description": "A file preview generator for node.js",
-  "main": "filepreview.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/maxlabelle/filepreview.git"
-  },
-  "keywords": [
-    "video",
-    "file",
-    "preview",
-    "thumbnail",
-    "image",
-    "graphic",
-    "visual",
-    "document"
-  ],
-  "author": "Maxime Labelle <Maxime.Labelle@owasp.org> (https://github.com/maxlabelle/filepreview)",
-  "license": "BSD-4-Clause",
-  "bugs": {
-    "url": "https://github.com/maxlabelle/filepreview/issues"
-  },
-  "homepage": "https://github.com/maxlabelle/filepreview#readme",
-  "dependencies": {
-    "async": "^2.6.0"
-  }
+    "name": "filepreview",
+    "version": "1.0.17",
+    "description": "A file preview generator for node.js",
+    "main": "filepreview.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Roguyt/filepreview.git"
+    },
+    "keywords": ["video", "file", "preview", "thumbnail", "image", "graphic", "visual", "document"],
+    "author": "Maxime Labelle <Maxime.Labelle@owasp.org> (https://github.com/maxlabelle/filepreview)",
+    "contributors": [
+        {
+            "url": "https://clmntw.fr",
+            "email": "git@clmntw.fr",
+            "name": "Roguyt"
+        }
+    ],
+    "license": "BSD-4-Clause",
+    "bugs": {
+        "url": "https://github.com/Roguyt/filepreview/issues"
+    },
+    "homepage": "https://github.com/Roguyt/filepreview#readme",
+    "scripts": {
+        "lint": "eslint ./",
+        "test": "echo 'No test yet.'"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "pretty-quick --staged --pattern '**/*.js'"
+        }
+    },
+    "dependencies": {
+        "async": "^2.6.0"
+    },
+    "devDependencies": {
+        "eslint": "^6.8.0",
+        "eslint-config-airbnb-base": "^14.1.0",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-import": "^2.20.2",
+        "husky": "^4.2.5",
+        "prettier": "^2.0.5",
+        "pretty-quick": "^2.0.1"
+    }
 }

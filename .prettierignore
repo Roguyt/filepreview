@@ -1,0 +1,8 @@
+node_modules/
+yarn.lock
+yarn-error.log
+uploads/
+.gitlab-ci.yml
+**/*.sh
+**/*.pem
+DockerFile
