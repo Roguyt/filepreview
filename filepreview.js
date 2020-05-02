@@ -119,6 +119,15 @@ module.exports = {
             if (options.width > 0 && options.height > 0) {
                 convertArgs.splice(0, 0, '-resize', `${options.width}x${options.height}`);
             }
+            if (options.width > 0 && !options.height) {
+                convertArgs.splice(0, 0, '-resize', `${options.width}`);
+            }
+            if (options.height > 0 && !options.width) {
+                convertArgs.splice(0, 0, '-resize', `x${options.height}`);
+            }
+            if (options.height || options.width) {
+                convertArgs.splice(0, 0, '-bordercolor', 'white', '-border', 0);
+            }
             if (options.autorotate) {
                 convertArgs.splice(0, 0, '-auto-orient');
             }
