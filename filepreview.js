@@ -174,18 +174,40 @@ module.exports = {
                     (error) => {
                         if (error) throw error;
                         const convertOtherArgs = [`${tempPDF}[0]`, output];
+                        if (options.colorSpace) {
+                            convertOtherArgs.splice(0, 0, '-colorspace', `${options.colorSpace}`);
+                        }
+                        if (options.density > 0) {
+                            convertOtherArgs.splice(0, 0, '-density', `${options.density}`);
+                        }
                         if (options.width > 0 && options.height > 0) {
                             convertOtherArgs.splice(0, 0, '-resize', `${options.width}x${options.height}`);
                         }
+                        if (options.width > 0 && !options.height) {
+                            convertOtherArgs.splice(0, 0, '-resize', `${options.width}`);
+                        }
+                        if (options.height > 0 && !options.width) {
+                            convertOtherArgs.splice(0, 0, '-resize', `x${options.height}`);
+                        }
+                        if (options.height || options.width) {
+                            convertOtherArgs.splice(0, 0, '-bordercolor', 'white', '-border', 0);
+                        }
+                        if (options.autorotate) {
+                            convertOtherArgs.splice(0, 0, '-auto-orient');
+                        }
                         if (options.quality) {
                             convertOtherArgs.splice(0, 0, '-quality', options.quality);
+                        }
+                        if (options.background) {
+                            convertOtherArgs.splice(0, 0, '-background', options.background);
+                            convertOtherArgs.splice(0, 0, '-flatten');
                         }
                         childProcess.execFile('convert', convertOtherArgs, (childProcessErr) => {
                             if (childProcessErr) throw childProcessErr;
 
                             fs.unlink(tempPDF, (fsErr) => {
                                 if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
-                                    fs.unlink(input);
+                                    fs.unlink(input, () => {});
                                 }
                                 if (fsErr) throw fsErr;
                                 return null;
