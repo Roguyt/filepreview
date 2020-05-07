@@ -100,13 +100,15 @@ module.exports = {
                 );
             }
 
-            childProcess.execFile('ffmpeg', ffmpegArgs, (childProcessErr) => {
-                if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
-                    fs.unlinkSync(input);
-                }
+            return new Promise((resolve, reject) => {
+                childProcess.execFile('ffmpeg', ffmpegArgs, (childProcessErr) => {
+                    if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
+                        fs.unlinkSync(input);
+                    }
 
-                if (childProcessErr) throw childProcessErr;
-                return null;
+                    if (childProcessErr) return reject(childProcessErr);
+                    return resolve();
+                });
             });
         }
 
@@ -141,12 +143,15 @@ module.exports = {
                 convertArgs.splice(0, 0, '-background', options.background);
                 convertArgs.splice(0, 0, '-flatten');
             }
-            childProcess.execFile('convert', convertArgs, (childProcessErr) => {
-                if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
-                    fs.unlinkSync(input);
-                }
-                if (childProcessErr) throw childProcessErr;
-                return null;
+
+            return new Promise((resolve, reject) => {
+                childProcess.execFile('convert', convertArgs, (childProcessErr) => {
+                    if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
+                        fs.unlinkSync(input);
+                    }
+                    if (childProcessErr) return reject(childProcessErr);
+                    return resolve();
+                });
             });
         }
 
@@ -167,96 +172,124 @@ module.exports = {
                 }
             }
 
-            if (unoconvPagerange === '1') {
-                childProcess.execFile(
-                    'unoconv',
-                    ['-e', `PageRange=${unoconvPagerange}`, '-o', tempPDF, input],
-                    (error) => {
-                        if (error) throw error;
-                        const convertOtherArgs = [`${tempPDF}[0]`, output];
-                        if (options.colorSpace) {
-                            convertOtherArgs.splice(0, 0, '-colorspace', `${options.colorSpace}`);
-                        }
-                        if (options.density > 0) {
-                            convertOtherArgs.splice(0, 0, '-density', `${options.density}`);
-                        }
-                        if (options.width > 0 && options.height > 0) {
-                            convertOtherArgs.splice(0, 0, '-resize', `${options.width}x${options.height}`);
-                        }
-                        if (options.width > 0 && !options.height) {
-                            convertOtherArgs.splice(0, 0, '-resize', `${options.width}`);
-                        }
-                        if (options.height > 0 && !options.width) {
-                            convertOtherArgs.splice(0, 0, '-resize', `x${options.height}`);
-                        }
-                        if (options.height || options.width) {
-                            convertOtherArgs.splice(0, 0, '-bordercolor', 'white', '-border', 0);
-                        }
-                        if (options.autorotate) {
-                            convertOtherArgs.splice(0, 0, '-auto-orient');
-                        }
-                        if (options.quality) {
-                            convertOtherArgs.splice(0, 0, '-quality', options.quality);
-                        }
-                        if (options.background) {
-                            convertOtherArgs.splice(0, 0, '-background', options.background);
-                            convertOtherArgs.splice(0, 0, '-flatten');
-                        }
-                        childProcess.execFile('convert', convertOtherArgs, (childProcessErr) => {
-                            if (childProcessErr) throw childProcessErr;
+            return new Promise((resolve, reject) => {
+                if (unoconvPagerange === '1') {
+                    childProcess.execFile(
+                        'unoconv',
+                        ['-e', `PageRange=${unoconvPagerange}`, '-o', tempPDF, input],
+                        (error) => {
+                            if (error) {
+                                reject(error);
+                                return;
+                            }
 
-                            fs.unlink(tempPDF, (fsErr) => {
-                                if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
-                                    fs.unlink(input, () => {});
-                                }
-                                if (fsErr) throw fsErr;
-                                return null;
-                            });
-                        });
-                    }
-                );
-            } else {
-                childProcess.execFile(
-                    'unoconv',
-                    ['-e', `PageRange=${unoconvPagerange}`, '-o', tempPDF, input],
-                    (childProcessErr) => {
-                        if (childProcessErr) throw childProcessErr;
-                        const pages = [];
-                        for (let x = 0; x < pagerangeStop; x += 1) {
-                            pages.push(x);
-                        }
-                        async.eachSeries(
-                            pages,
-                            function iteratee(page, callback) {
-                                const convertOtherArgs = [`${tempPDF}[${page}]`, `${page}_${output}`];
-                                if (options.width > 0 && options.height > 0) {
-                                    convertOtherArgs.splice(0, 0, '-resize', `${options.width}x${options.height}`);
-                                }
-                                if (options.quality) {
-                                    convertOtherArgs.splice(0, 0, '-quality', options.quality);
-                                }
-                                childProcess.execFile('convert', convertOtherArgs, (error) => {
-                                    if (error) callback(error);
-                                    return callback();
-                                });
-                            },
-                            function done(err) {
-                                if (err) {
-                                    throw err;
+                            const convertOtherArgs = [`${tempPDF}[0]`, output];
+                            if (options.colorSpace) {
+                                convertOtherArgs.splice(0, 0, '-colorspace', `${options.colorSpace}`);
+                            }
+                            if (options.density > 0) {
+                                convertOtherArgs.splice(0, 0, '-density', `${options.density}`);
+                            }
+                            if (options.width > 0 && options.height > 0) {
+                                convertOtherArgs.splice(0, 0, '-resize', `${options.width}x${options.height}`);
+                            }
+                            if (options.width > 0 && !options.height) {
+                                convertOtherArgs.splice(0, 0, '-resize', `${options.width}`);
+                            }
+                            if (options.height > 0 && !options.width) {
+                                convertOtherArgs.splice(0, 0, '-resize', `x${options.height}`);
+                            }
+                            if (options.height || options.width) {
+                                convertOtherArgs.splice(0, 0, '-bordercolor', 'white', '-border', 0);
+                            }
+                            if (options.autorotate) {
+                                convertOtherArgs.splice(0, 0, '-auto-orient');
+                            }
+                            if (options.quality) {
+                                convertOtherArgs.splice(0, 0, '-quality', options.quality);
+                            }
+                            if (options.background) {
+                                convertOtherArgs.splice(0, 0, '-background', options.background);
+                                convertOtherArgs.splice(0, 0, '-flatten');
+                            }
+                            childProcess.execFile('convert', convertOtherArgs, (childProcessErr) => {
+                                if (childProcessErr) {
+                                    reject(childProcessErr);
+                                    return;
                                 }
 
-                                fs.unlink(tempPDF, (error) => {
+                                fs.unlink(tempPDF, (fsErr) => {
                                     if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
                                         fs.unlink(input, () => {});
                                     }
-                                    if (error) throw error;
-                                    return null;
+                                    if (fsErr) {
+                                        reject(fsErr);
+                                        return;
+                                    }
+
+                                    resolve();
                                 });
+                            });
+                        }
+                    );
+                } else {
+                    childProcess.execFile(
+                        'unoconv',
+                        ['-e', `PageRange=${unoconvPagerange}`, '-o', tempPDF, input],
+                        (childProcessErr) => {
+                            if (childProcessErr) {
+                                reject(childProcessErr);
+                                return;
                             }
-                        );
-                    }
-                );
-            }
+                            const pages = [];
+                            for (let x = 0; x < pagerangeStop; x += 1) {
+                                pages.push(x);
+                            }
+                            async.eachSeries(
+                                pages,
+                                function iteratee(page, callback) {
+                                    const convertOtherArgs = [`${tempPDF}[${page}]`, `${page}_${output}`];
+                                    if (options.width > 0 && options.height > 0) {
+                                        convertOtherArgs.splice(0, 0, '-resize', `${options.width}x${options.height}`);
+                                    }
+                                    if (options.quality) {
+                                        convertOtherArgs.splice(0, 0, '-quality', options.quality);
+                                    }
+                                    childProcess.execFile('convert', convertOtherArgs, (error) => {
+                                        if (error) {
+                                            callback(error);
+                                        } else {
+                                            callback();
+                                        }
+                                    });
+                                },
+                                function done(err) {
+                                    if (err) {
+                                        reject(err);
+                                        return;
+                                    }
+
+                                    fs.unlink(tempPDF, (error) => {
+                                        if (src.indexOf('http://') === 0 || src.indexOf('https://') === 0) {
+                                            fs.unlink(input, () => {});
+                                        }
+                                        if (error) {
+                                            reject(error);
+                                            return;
+                                        }
+
+                                        resolve();
+                                    });
+                                }
+                            );
+                        }
+                    );
+                }
+            });
         }
+
+        return new Promise((resolve, reject) => {
+            reject(new Error("Couldn't process the file"));
+        });
     },
 };
